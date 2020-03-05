@@ -17,5 +17,10 @@ Route::group([
      */
     $router->get('/webhook', 'WebhookController@index')->name('admin.webhook.index');
     $router->post('/webhook/setwebhook', 'WebhookController@setWebhook')->name('admin.webhook.setwebhook');
+    /**
+     * Settings routes
+     */
+    $router->get('/settings', 'SettingsController@index')->name('admin.settings.index');
+    $router->post('/settings/setwebhook', 'SettingsController@setWebhook')->name('admin.settings.setwebhook');
 
 });

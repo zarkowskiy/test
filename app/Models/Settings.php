@@ -16,4 +16,5 @@ class Settings extends Model
     public $timestamps = false;
     public $primaryKey = "key";
     public $incrementing = false;
+    protected $fillable = ['key','value'];
 }
