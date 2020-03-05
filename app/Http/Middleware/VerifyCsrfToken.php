@@ -1,0 +1,30 @@
+<?php
+
+namespace App\Http\Middleware;
+
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken as BaseVerifier;
+
+class VerifyCsrfToken extends BaseVerifier
+{
+    /**
+     * The URIs that should be excluded from CSRF verification.
+     *
+     * @var array
+     */
+    protected $except = [
+        
+        //
+    ];
+
+    public function __construct(
+        \Illuminate\Foundation\Application $app,
+        \Illuminate\Contracts\Encryption\Encrypter $encrypter
+    )
+    {
+        $this->app = $app;
+        $this->encrypter = $encrypter;
+        $this->except[] = \Telegram::getAccessToken();
+        $this->except[] = "admin/webhook/setwebhook";
+    }
+
+}
