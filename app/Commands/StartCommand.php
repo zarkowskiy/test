@@ -56,33 +56,67 @@ class StartCommand extends Command
 
         try
         {
-            $cities = Cities::limit(env('PAGINATION_LIMIT'))->get();
-            $count = Cities::all()->count();
-            $keyboard = SimpleBotHandler::getCitiesKeyboard($cities);
+            if (is_null($user->idCity)) {
+                $cities = Cities::limit(env('PAGINATION_LIMIT'))->get();
+                $count = Cities::all()->count();
+                $keyboard = SimpleBotHandler::getCitiesKeyboard($cities);
 
-            if ($count > env('PAGINATION_LIMIT')) {
-                $keyboard[] =
+                if ($count > env('PAGINATION_LIMIT')) {
+                    $keyboard[] =
+                        [
+                            [
+                                'text' => 'Далее',
+                                'callback_data' => "page-1"
+                            ]
+                        ];
+                }
+
+                $this->replyWithSticker([
+                    'sticker' => url("images/".Settings::find("logo_url")['value'])
+                ]);
+                $this->replyWithMessage(
                     [
-                        [
-                            'text' => 'Далее',
-                            'callback_data' => "page-1"
-                        ]
-                    ];
+                        'text' => Settings::find("welcome_text")['value'],
+                        'reply_markup' => $this->telegram->replyKeyboardMarkup(
+                            [
+                                'inline_keyboard'=> $keyboard
+                            ]
+                        )
+                    ]
+                );
             }
-
-            $this->replyWithSticker([
-                'sticker' => url("images/".Settings::find("logo_url")['value'])
-            ]);
-            $this->replyWithMessage(
-                [
-                    'text' => Settings::find("welcome_text")['value'],
-                    'reply_markup' => $this->telegram->replyKeyboardMarkup(
-                        [
-                            'inline_keyboard'=> $keyboard
-                        ]
-                    )
-                ]
-            );
+            else {
+                $this->replyWithSticker([
+                    'sticker' => url("images/".Settings::find("logo_url")['value'])
+                ]);
+                $this->replyWithMessage(
+                    [
+                        'text' => Settings::find("welcome_text")['value'],
+                        'reply_markup' => $this->telegram->replyKeyboardMarkup(
+                            [
+                                'inline_keyboard'=> [
+                                    [
+                                        [
+                                            'text' => 'Выбрать место',
+                                            'switch_inline_query_current_chat' => '',
+                                        ],
+                                    ],
+                                    [
+                                        [
+                                            'text' => 'Мои брони',
+                                            'callback_data' => 'bron'
+                                        ],
+                                        [
+                                            'text' => 'Другой город',
+                                            'callback_data' => 'city-change'
+                                        ]
+                                    ]
+                                ]
+                            ]
+                        )
+                    ]
+                );
+            }
         }
         catch(\Exception $ex)
         {

@@ -32,40 +32,38 @@ class SimpleBotHandler
 
                         $keyboard = self::getCitiesKeyboard($cities);
 
-                        switch (true) {
-                            case $matches[1] == 0:
-                                if ($count > env('PAGINATION_LIMIT')) {
-                                    $keyboard[] =
-                                        [
-                                            [
-                                                'text' => 'Далее',
-                                                'callback_data' => "page-1"
-                                            ]
-                                        ];
-                                }
-                                break;
-                            case ($matches[1] > 0 && $matches[1] < $pages):
+                        if ($matches[1] == 0) {
+                            if ($count > env('PAGINATION_LIMIT')) {
                                 $keyboard[] =
                                     [
-                                        [
-                                            'text' => 'Назад',
-                                            'callback_data' => "page-".($matches[1]-1)
-                                        ],
                                         [
                                             'text' => 'Далее',
-                                            'callback_data' => "page-".($matches[1]+1)
+                                            'callback_data' => "page-1"
                                         ]
                                     ];
-                                break;
-                            case ($matches[1] == $pages):
-                                $keyboard[] =
+                            }
+                        }
+                        else if ($matches[1] > 0 && $matches[1] < $pages) {
+                            $keyboard[] =
+                                [
                                     [
-                                        [
-                                            'text' => 'Назад',
-                                            'callback_data' => "page-".($pages-1)
-                                        ]
-                                    ];
-                                break;
+                                        'text' => 'Назад',
+                                        'callback_data' => "page-".($matches[1]-1)
+                                    ],
+                                    [
+                                        'text' => 'Далее',
+                                        'callback_data' => "page-".($matches[1]+1)
+                                    ]
+                                ];
+                        }
+                        else if ($matches[1] == $pages) {
+                            $keyboard[] =
+                                [
+                                    [
+                                        'text' => 'Назад',
+                                        'callback_data' => "page-".($pages-1)
+                                    ]
+                                ];
                         }
 
                         Telegram::editMessageText(
@@ -95,6 +93,22 @@ class SimpleBotHandler
                         case 'set':
                             TelegramUsers::where('idTelegramUser', $idUser)
                                 ->update(['idCity' => $matches[2]]);
+
+                            $response = Telegram::sendMessage([
+                                'chat_id' => $idUser,
+                                'text' => 'Я готов забронировать 🔔 для тебя столик в ресторанах🥗 и барах🍹города <b>'. Cities::find($matches[2])['name'].'</b>',
+                                'parse_mode' => 'html'
+                            ]);
+
+                            sleep(2);
+
+                            Telegram::deleteMessage(
+                                [
+                                    'chat_id' => $idUser,
+                                    'message_id' => $response['message_id']
+                                ]
+                            );
+
                             Telegram::editMessageText(
                                 [
                                     'chat_id' => $idUser,
@@ -125,8 +139,40 @@ class SimpleBotHandler
                                 ]
                             );
                             break;
+                        case 'change':
+                            $cities = Cities::limit(env('PAGINATION_LIMIT'))->get();
+                            $count = Cities::all()->count();
+                            $keyboard = SimpleBotHandler::getCitiesKeyboard($cities);
+
+                            if ($count > env('PAGINATION_LIMIT')) {
+                                $keyboard[] =
+                                    [
+                                        [
+                                            'text' => 'Далее',
+                                            'callback_data' => "page-1"
+                                        ]
+                                    ];
+                            }
+
+                            Telegram::editMessageText(
+                                [
+                                    'chat_id' => $idUser,
+                                    'message_id' => $message_id,
+                                    'text' => Settings::find("welcome_text")['value'],
+                                    'reply_markup' => Telegram::replyKeyboardMarkup(
+                                        [
+                                            'inline_keyboard'=> $keyboard
+                                        ]
+                                    )
+                                ]
+                            );
+                            break;
+                        default:
+                            return;
                     }
                     break;
+                default:
+                    return;
             }
         }
     }

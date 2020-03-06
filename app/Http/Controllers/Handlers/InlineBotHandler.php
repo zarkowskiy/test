@@ -62,17 +62,18 @@ class InlineBotHandler
                         ]
                     ];
                 }
+
                 Telegram::answerInlineQuery([
                     'inline_query_id' => $update['inline_query']['id'],
                     'results' => $inlineQueryResults,
-                    'cache_time' => 30,
+                    'cache_time' => 0,
                     'is_personal' => true
                 ]);
             }
         }
         catch (\Exception $exception){
             Telegram::sendMessage([
-                'chat_id' => "403914206",
+                'chat_id' => "641597655",
                 'text' => var_export($exception->getMessage().$exception->getLine(),true)
             ]);
         }
