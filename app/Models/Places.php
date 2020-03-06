@@ -11,14 +11,24 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  *
  * @property int idPlace
  * @property int idCity
- * @property string names
+ * @property string name
+ * @property string image
  * @property string address
  * @property string description
+ * @property Schedules|null schedule
  */
 class Places extends Model
 {
     public $timestamps = false;
     protected $primaryKey = "idPlace";
+
+    protected $fillable = [
+        'idCity',
+        'name',
+        'image',
+        'address',
+        'description'
+    ];
 
     /**
      * @return HasOne

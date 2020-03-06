@@ -103,4 +103,5 @@ return [
     'menu_titles'            => [],
     'prev'                   => 'Попередня',
     'next'                   => 'Наступна',
+    'quick_create'           => 'Додати'
 ];

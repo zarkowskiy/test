@@ -17,8 +17,9 @@ class CreatePlacesTable extends Migration
             $table->bigIncrements('idPlace');
             $table->unsignedBigInteger('idCity');
             $table->string('name',256);
-            $table->string('address',512);
-            $table->string('description',512);
+            $table->string('image',256)->nullable();
+            $table->string('address',512)->nullable();
+            $table->string('description',512)->nullable();
         });
         Schema::table('places',function (Blueprint $table){
             $table->foreign('idCity')

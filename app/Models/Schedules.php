@@ -17,7 +17,14 @@ class Schedules extends Model
 {
     public $timestamps = false;
     protected $primaryKey = "idSchedule";
+    protected $fillable = [
+        "idPlace",
+        "scheduledJSON"
+    ];
 
+    protected $casts = [
+        'scheduledJSON' => 'json'
+    ];
     /**
      * @return HasOne
      */

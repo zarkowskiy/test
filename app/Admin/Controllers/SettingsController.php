@@ -133,7 +133,6 @@ class SettingsController extends Controller
         }
         if ($request->files->has("logo_url")) {
             $file = $request->file('logo_url');
-            $filename = explode('.',$file->getClientOriginalName());
             $storagePath = Storage::disk('admin')->put("images",$file);
             Settings::updateOrCreate(
                 ['key' => "logo_url"],
