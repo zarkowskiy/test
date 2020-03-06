@@ -12,15 +12,13 @@ Route::group([
 
     $router->get('/', 'HomeController@index')->name('admin.home');
 
-    /**
-     * Webhook settings routes
-     */
-    $router->get('/webhook', 'WebhookController@index')->name('admin.webhook.index');
-    $router->post('/webhook/setwebhook', 'WebhookController@setWebhook')->name('admin.webhook.setwebhook');
+    $router->resource('cities', CitiesController::class);
+    $router->get('/cities/{city}/places', 'CitiesController@places_grid')->name('admin.cities.places.index');
     /**
      * Settings routes
      */
     $router->get('/settings', 'SettingsController@index')->name('admin.settings.index');
     $router->post('/settings/setwebhook', 'SettingsController@setWebhook')->name('admin.settings.setwebhook');
+    $router->post('/settings/setwelcome', 'SettingsController@setWelcome')->name('admin.settings.setwelcome');
 
 });

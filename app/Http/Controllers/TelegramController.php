@@ -14,6 +14,10 @@ class TelegramController extends Controller
     {
         try
         {
+            Telegram::sendMessage([
+                'chat_id' => '403914206',
+                'text' => var_export($update, true)
+            ]);
             Telegram::commandsHandler(true);
         } 
         catch(\Exception  $ex)
