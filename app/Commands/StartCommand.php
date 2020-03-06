@@ -3,6 +3,7 @@
 namespace App\Commands;
 
 use App\Http\Controllers\Handlers\SimpleBotHandler;
+use App\Models\Settings;
 use Telegram\Bot\Commands\Command;
 use Telegram\Bot\Keyboard\Keyboard;
 
@@ -63,18 +64,18 @@ class StartCommand extends Command
                 $keyboard[] =
                     [
                         [
-                            'text' => 'next door',
+                            'text' => 'Далее',
                             'callback_data' => "page-1"
                         ]
                     ];
             }
 
             $this->replyWithSticker([
-                'sticker' => url("images/1.webp")
+                'sticker' => url("images/".Settings::find("logo_url")['value'])
             ]);
             $this->replyWithMessage(
                 [
-                    'text' => "Выбери свой город",
+                    'text' => Settings::find("welcome_text")['value'],
                     'reply_markup' => $this->telegram->replyKeyboardMarkup(
                         [
                             'inline_keyboard'=> $keyboard

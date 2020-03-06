@@ -4,6 +4,8 @@
 namespace App\Http\Controllers\Handlers;
 
 use App\Models\Cities;
+use App\Models\Settings;
+use App\Models\TelegramUsers;
 use Telegram;
 use Telegram\Bot\Objects\Update;
 
@@ -30,36 +32,36 @@ class SimpleBotHandler
 
                         $keyboard = self::getCitiesKeyboard($cities);
 
-                        switch ($matches[1]) {
-                            case $matches[1] == '0':
+                        switch (true) {
+                            case $matches[1] == 0:
                                 if ($count > env('PAGINATION_LIMIT')) {
                                     $keyboard[] =
                                         [
                                             [
-                                                'text' => 'next door',
+                                                'text' => 'Далее',
                                                 'callback_data' => "page-1"
                                             ]
                                         ];
                                 }
                                 break;
-                            case $matches[1] > 0 && $matches[1] < $pages:
+                            case ($matches[1] > 0 && $matches[1] < $pages):
                                 $keyboard[] =
                                     [
                                         [
-                                            'text' => 'prev door',
+                                            'text' => 'Назад',
                                             'callback_data' => "page-".($matches[1]-1)
                                         ],
                                         [
-                                            'text' => 'next door',
+                                            'text' => 'Далее',
                                             'callback_data' => "page-".($matches[1]+1)
                                         ]
                                     ];
                                 break;
-                            case $matches[1] == $pages:
+                            case ($matches[1] == $pages):
                                 $keyboard[] =
                                     [
                                         [
-                                            'text' => 'prev door',
+                                            'text' => 'Назад',
                                             'callback_data' => "page-".($pages-1)
                                         ]
                                     ];
@@ -70,7 +72,7 @@ class SimpleBotHandler
                             [
                                 'chat_id' => $idUser,
                                 'message_id' => $message_id,
-                                'text' => "Выбери свой город",
+                                'text' => Settings::find("welcome_text")['value'],
                                 'reply_markup' => Telegram::replyKeyboardMarkup(
                                     [
                                         'inline_keyboard'=> $keyboard
@@ -87,10 +89,41 @@ class SimpleBotHandler
                         );
                     }
                     break;
-                case 'set':
+                case 'city':
                     switch ($matches[1])
                     {
-                        case 'city':
+                        case 'set':
+                            TelegramUsers::where('idTelegramUser', $idUser)
+                                ->update(['idCity' => $matches[2]]);
+                            Telegram::editMessageText(
+                                [
+                                    'chat_id' => $idUser,
+                                    'message_id' => $message_id,
+                                    'text' => Settings::find("welcome_text")['value'],
+                                    'reply_markup' => Telegram::replyKeyboardMarkup(
+                                        [
+                                            'inline_keyboard'=> [
+                                                [
+                                                    [
+                                                        'text' => 'Выбрать место',
+                                                        'switch_inline_query_current_chat' => '',
+                                                    ],
+                                                ],
+                                                [
+                                                    [
+                                                        'text' => 'Мои брони',
+                                                        'callback_data' => 'bron'
+                                                    ],
+                                                    [
+                                                        'text' => 'Другой город',
+                                                        'callback_data' => 'city-change'
+                                                    ]
+                                                ]
+                                            ]
+                                        ]
+                                    )
+                                ]
+                            );
                             break;
                     }
                     break;
@@ -107,13 +140,13 @@ class SimpleBotHandler
             $row[] =
                 [
                     'text' => $cities[$i]->name,
-                    'callback_data' => "set-city-".$cities[$i]->idCity
+                    'callback_data' => "city-set-".$cities[$i]->idCity
                 ];
             if (isset($cities[$i+1])) {
                 $row[] =
                     [
                         'text' => $cities[$i+1]->name,
-                        'callback_data' => "set-city-".$cities[$i]->idCity
+                        'callback_data' => "city-set-".$cities[$i]->idCity
                     ];
             }
             $keyboard[] = $row;
