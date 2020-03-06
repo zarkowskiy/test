@@ -201,8 +201,6 @@ class CitiesController extends AdminController
                 $storagePath = Storage::disk('admin')->put("images",$file);
                 $place->image = "images/".basename($storagePath);
             }
-        }else{
-            $place->image = null;
         }
         $place->save();
         admin_toastr(__('admin.save_succeeded'));
