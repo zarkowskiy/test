@@ -64,7 +64,7 @@ class StartCommand extends Command
                     [
                         [
                             'text' => 'next door',
-                            'callback_data' => "page-2"
+                            'callback_data' => "page-1"
                         ]
                     ];
             }

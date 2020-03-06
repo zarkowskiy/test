@@ -12,65 +12,80 @@ class SimpleBotHandler
 {
     public static function handle(Update $update)
     {
-        $idUser = $update['message']['from']['id'];
-
         if (isset($update['callback_query']['data'])) {
+            $idUser = $update['callback_query']['message']['chat']['id'];
+            $message_id = $update['callback_query']['message']['message_id'];
             $matches = explode('-', $update['callback_query']['data']);
             switch ($matches[0])
             {
                 case 'page':
-                    $cities = Cities::offset(env('PAGINATION_LIMIT') * $matches[1])->limit(env('PAGINATION_LIMIT'))->get();
-                    $count = Cities::all()->count();
-                    $pages = ceil($count / env('PAGINATION_LIMIT'));
+                    try {
+                        if ($matches[1] == 0) {
+                            $cities = Cities::limit(env('PAGINATION_LIMIT'))->get();
+                        } else {
+                            $cities = Cities::offset(env('PAGINATION_LIMIT') * $matches[1])->limit(env('PAGINATION_LIMIT'))->get();
+                        }
+                        $count = Cities::all()->count();
+                        $pages = ceil($count / env('PAGINATION_LIMIT')) - 1;
 
-                    $keyboard = self::getCitiesKeyboard($cities);
+                        $keyboard = self::getCitiesKeyboard($cities);
 
-                    switch ($matches[1]) {
-                        case $matches[1] == 1:
-                            if ($count > env('PAGINATION_LIMIT')) {
+                        switch ($matches[1]) {
+                            case $matches[1] == '0':
+                                if ($count > env('PAGINATION_LIMIT')) {
+                                    $keyboard[] =
+                                        [
+                                            [
+                                                'text' => 'next door',
+                                                'callback_data' => "page-1"
+                                            ]
+                                        ];
+                                }
+                                break;
+                            case $matches[1] > 0 && $matches[1] < $pages:
                                 $keyboard[] =
                                     [
                                         [
+                                            'text' => 'prev door',
+                                            'callback_data' => "page-".($matches[1]-1)
+                                        ],
+                                        [
                                             'text' => 'next door',
-                                            'callback_data' => "page-2"
+                                            'callback_data' => "page-".($matches[1]+1)
                                         ]
                                     ];
-                            }
-                            break;
-                        case $matches[1] > 1 && $matches[1] < $pages:
-                            $keyboard[] =
-                                [
+                                break;
+                            case $matches[1] == $pages:
+                                $keyboard[] =
                                     [
-                                        'text' => 'prev door',
-                                        'callback_data' => "page-".($matches[1]-1)
-                                    ],
-                                    [
-                                        'text' => 'next door',
-                                        'callback_data' => "page-".($matches[1]+1)
-                                    ]
-                                ];
-                            break;
-                        case $matches[1] == $pages:
-                            $keyboard[] =
-                                [
-                                    [
-                                        'text' => 'prev door',
-                                        'callback_data' => "page-".$pages-1
-                                    ]
-                                ];
-                            break;
-                    }
+                                        [
+                                            'text' => 'prev door',
+                                            'callback_data' => "page-".($pages-1)
+                                        ]
+                                    ];
+                                break;
+                        }
 
-                    Telegram::sendMessage(
-                        [
-                            'text' => "Выбери свой город",
-                            'reply_markup' => $this->telegram->replyKeyboardMarkup(
-                                [
-                                    'inline_keyboard'=> $keyboard
-                                ]
-                            )
-                        ]
-                    );
+                        Telegram::editMessageText(
+                            [
+                                'chat_id' => $idUser,
+                                'message_id' => $message_id,
+                                'text' => "Выбери свой город",
+                                'reply_markup' => Telegram::replyKeyboardMarkup(
+                                    [
+                                        'inline_keyboard'=> $keyboard
+                                    ]
+                                )
+                            ]
+                        );
+                    } catch (\Exception $exception) {
+                        Telegram::sendMessage(
+                            [
+                                'chat_id' => '641597655',
+                                'text' => var_export($exception->getMessage(), true)
+                            ]
+                        );
+                    }
                     break;
                 case 'set':
                     switch ($matches[1])
@@ -92,13 +107,13 @@ class SimpleBotHandler
             $row[] =
                 [
                     'text' => $cities[$i]->name,
-                    'callback_data' => "set-city-$cities[$i]->idCity"
+                    'callback_data' => "set-city-".$cities[$i]->idCity
                 ];
             if (isset($cities[$i+1])) {
                 $row[] =
                     [
                         'text' => $cities[$i+1]->name,
-                        'callback_data' => "set-city-$cities[$i]->idCity"
+                        'callback_data' => "set-city-".$cities[$i]->idCity
                     ];
             }
             $keyboard[] = $row;

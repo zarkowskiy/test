@@ -34,7 +34,7 @@ class TelegramController extends Controller
         if (isset($update['inline_query'])) {
             InlineBotHandler::handle($update);
         }
-        else if (isset($update['message'])) {
+        else if (isset($update['message']) || isset($update['callback_query'])) {
             SimpleBotHandler::handle($update);
         }
 
