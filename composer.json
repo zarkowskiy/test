@@ -8,7 +8,7 @@
 		"php": ">=7.3",
 		"encore/laravel-admin": "dev-master",
 		"irazasyed/telegram-bot-sdk": "dev-master",
-		"laravel/framework": "6.0.*",
+		"laravel/framework": "6.20.*",
 		"laravel/tinker": "~1.0"
 
 	},
